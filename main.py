@@ -22,9 +22,9 @@ import numpy as np
 
 # load a couple of models, ready for serving
 models = {
-    'en_w2v': spacy.load('en_core_web_lg'),
+    'en_w2v': spacy.load('en_core_web_sm'),
     # 'nl_w2v': spacy.load('nl_core_news_sm'),
-    'en_distilbert': spacy.load('en_trf_distilbertbaseuncased_lg')
+    # 'en_distilbert': spacy.load('en_trf_distilbertbaseuncased_lg')
 }
 
 # method for combining word vectors
