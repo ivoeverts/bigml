@@ -1,6 +1,15 @@
 runtime: python37
+env: flex
 
-instance_class: F4_HIGHMEM
+# instance_class: F4_HIGHMEM
+manual_scaling:
+  instances: 2
+
+resources:
+  cpu: 1
+  memory_gb: 8
+  disk_size_gb: 10
+
 
 handlers:
 - url: /.*

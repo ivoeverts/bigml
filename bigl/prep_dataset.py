@@ -27,28 +27,35 @@ with open('script.txt', 'r') as bigl_script:
     line = bigl_script.readline()
     
     while line:
-        
-        # observe current content
-        content = line.strip()
-        leading_whitespace_count = len(line) - len(content)
+
+        if line.startswith(' '):
+
+            # observe current content
+            content = line.strip()
+            is_start_of_character = content==content.upper()
+            leading_whitespace_count = len(line) - len(content)
+            
+            # a new character starts talking
+            if content in bigl_characters and leading_whitespace_count==character_start_whitespace_count:
+                current_character = bigl_characters[content]
+                if not current_character in samples:
+                    samples[current_character] = []
+                samples[current_character].append('')
+            else:
+                # a character is talking
+                if current_character and not is_start_of_character: # and abs(leading_whitespace_count-content_white_space_count)<3:
+                    samples[current_character][-1] += f'{content} '
+                else:
+                    current_character = None
+
+        else:
+            
+            current_character = None
 
         # read next content
         line = bigl_script.readline()
         
-        # a new character starts talking
-        if content in bigl_characters and leading_whitespace_count==character_start_whitespace_count:
-            current_character = bigl_characters[content]
-            if not current_character in samples:
-                samples[current_character] = []
-            samples[current_character].append('')
-            content_white_space_count = len(line)-len(line.strip())
-        else:
-            # a character is talking
-            if current_character and abs(leading_whitespace_count-content_white_space_count)<3:
-                samples[current_character][-1] += f'{content} '
-            # a character stops talking
-            else:
-                current_character = None
+
 
 def clean_sample(sample):
     return sample.replace('--', '').strip()
@@ -59,14 +66,18 @@ sentences, paragraphs = [], []
 # break data down on paragraph and sentence level
 for character in samples:
     print(f'{character}: {len(samples[character])}')
+    
     for sample in samples[character]:
         sample = clean_sample(sample)
+        if not len(sample):
+            continue
+        
         paragraphs.append({
             'character': character,
             'text': sample
         })
         sentences += [{'character': character, 'text': sentence}
-                      for sentence in re.split('[!?.]', sample) if len(sentence)]
+                      for sentence in re.split('[!?.]', sample) if len(sentence.strip())]
 
 # save to disk
 for data_type, data in {'sentences': sentences, 'paragraphs': paragraphs}.items():

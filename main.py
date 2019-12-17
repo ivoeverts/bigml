@@ -13,16 +13,27 @@
 # limitations under the License.
 
 # [START gae_python37_app]
-from flask import Flask
-from flask import jsonify
+from flask import Flask, Response
+import io
+import zlib
+from urllib.parse import unquote
 
 # spacy
 import spacy
 import numpy as np
 
+def compress_numpy_array(numpy_array):
+    """
+    Returns the given numpy array as compressed bytestring,
+    the uncompressed and the compressed byte size.
+    """
+    bytestream = io.BytesIO()
+    np.save(bytestream, numpy_array)
+    return zlib.compress(bytestream.getvalue())
+
 # load a couple of models, ready for serving
 models = {
-    'en_w2v': spacy.load('en_core_web_sm'),
+    'en_w2v': spacy.load('en_core_web_lg'),
     # 'nl_w2v': spacy.load('nl_core_news_sm'),
     # 'en_distilbert': spacy.load('en_trf_distilbertbaseuncased_lg')
 }
@@ -40,10 +51,12 @@ app = Flask(__name__)
 def enc(text: str, model: str = 'en_w2v', pooling_operator: str = 'mean'):
     result = None
     if pooling_operator == 'mean':
-        result = models[model](text).vector
+        result = models[model](unquote(text)).vector
     else:
         raise ValueError(f'Unkown pooling_operator: {pooling_operator}')
-    return jsonify(result.tolist())
+    # return result
+    return Response(response=compress_numpy_array(result), status=200,
+                    mimetype="application/octet_stream")
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
