@@ -1,4 +1,6 @@
 import pandas as pd
+import pickle
+import re
 
 # characters in the movie
 bigl_characters = {c: c for c in (
@@ -19,7 +21,7 @@ content_white_space_count = None
 
 # collect paragraphs per character
 current_character = None
-text_data = {}
+samples = {}
 with open('script.txt', 'r') as bigl_script:
     
     line = bigl_script.readline()
@@ -36,19 +38,36 @@ with open('script.txt', 'r') as bigl_script:
         # a new character starts talking
         if content in bigl_characters and leading_whitespace_count==character_start_whitespace_count:
             current_character = bigl_characters[content]
-            if not current_character in text_data:
-                text_data[current_character] = []
-            text_data[current_character].append('')
+            if not current_character in samples:
+                samples[current_character] = []
+            samples[current_character].append('')
             content_white_space_count = len(line)-len(line.strip())
         else:
             # a character is talking
             if current_character and abs(leading_whitespace_count-content_white_space_count)<3:
-                text_data[current_character][-1] += f'{content} '
+                samples[current_character][-1] += f'{content} '
             # a character stops talking
             else:
                 current_character = None
 
-for character, samples in text_data.items():
-    print(character)
-    for sample in samples[:3]:
-        print(f'\t{sample}')
+def clean_sample(sample):
+    return sample.replace('--', '').strip()
+
+# break into sentences and paragraphs
+sentences, paragraphs = [], []
+
+# break data down on paragraph and sentence level
+for character in samples:
+    print(f'{character}: {len(samples[character])}')
+    for sample in samples[character]:
+        sample = clean_sample(sample)
+        paragraphs.append({
+            'character': character,
+            'text': sample
+        })
+        sentences += [{'character': character, 'text': sentence}
+                      for sentence in re.split('[!?.]', sample) if len(sentence)]
+
+# save to disk
+for data_type, data in {'sentences': sentences, 'paragraphs': paragraphs}.items():
+    pd.DataFrame(data).to_pickle(data_type)
