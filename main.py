@@ -22,6 +22,9 @@ from urllib.parse import unquote
 import spacy
 import numpy as np
 
+is_using_gpu = spacy.prefer_gpu()
+print(f'GPU: {is_using_gpu}')
+
 def compress_numpy_array(numpy_array):
     """
     Returns the given numpy array as compressed bytestring,
@@ -36,10 +39,10 @@ models = {
     'w2v_sm': spacy.load('en_core_web_sm'),
     'w2v_md': spacy.load('en_core_web_md'),
     'w2v_lg': spacy.load('en_core_web_lg'),
-    # 'bert': spacy.load('en_trf_bertbaseuncased_lg'),
-    # 'roberta': spacy.load('en_trf_robertabase_lg'),
-    # 'distilbert': spacy.load('en_trf_distilbertbaseuncased_lg'),
-    # 'xlnet': spacy.load('en_trf_xlnetbasecased_lg')
+    'bert': spacy.load('en_trf_bertbaseuncased_lg'),
+    'roberta': spacy.load('en_trf_robertabase_lg'),
+    'distilbert': spacy.load('en_trf_distilbertbaseuncased_lg'),
+    'xlnet': spacy.load('en_trf_xlnetbasecased_lg')
 }
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -49,7 +52,7 @@ app = Flask(__name__)
 @app.route('/<text>')
 @app.route('/<text>/<model>')
 @app.route('/<text>/<model>/<pooling_operator>')
-def enc(text: str, model: str = 'en_w2v', pooling_operator: str = 'mean'):
+def enc(text: str, model: str = 'w2v_sm', pooling_operator: str = 'mean'):
     result = None
     if pooling_operator == 'mean':
         result = models[model](unquote(text)).vector
@@ -63,5 +66,5 @@ if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
     # can be configured by adding an `entrypoint` to app.yaml.
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
 # [END gae_python37_app]
