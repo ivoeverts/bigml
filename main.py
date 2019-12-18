@@ -33,13 +33,14 @@ def compress_numpy_array(numpy_array):
 
 # load a couple of models, ready for serving
 models = {
-    'en_w2v': spacy.load('en_core_web_lg'),
-    # 'nl_w2v': spacy.load('nl_core_news_sm'),
-    # 'en_distilbert': spacy.load('en_trf_distilbertbaseuncased_lg')
+    'w2v_sm': spacy.load('en_core_web_sm'),
+    'w2v_md': spacy.load('en_core_web_md'),
+    'w2v_lg': spacy.load('en_core_web_lg'),
+    # 'bert': spacy.load('en_trf_bertbaseuncased_lg'),
+    # 'roberta': spacy.load('en_trf_robertabase_lg'),
+    # 'distilbert': spacy.load('en_trf_distilbertbaseuncased_lg'),
+    # 'xlnet': spacy.load('en_trf_xlnetbasecased_lg')
 }
-
-# method for combining word vectors
-pooling_operator = 'mean'
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
