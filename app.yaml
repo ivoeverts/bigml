@@ -5,9 +5,6 @@
 runtime: custom
 env: flex
 
-readiness_check:
-  app_start_timeout_sec: 1800
-
 # instance_class: F4_HIGHMEM
 manual_scaling:
   instances: 2

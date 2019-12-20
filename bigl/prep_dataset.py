@@ -31,7 +31,7 @@ with open('script.txt', 'r') as bigl_script:
         if line.startswith(' '):
 
             # observe current content
-            content = line.strip()
+            content = line.replace('--', '').strip()
             is_start_of_character = content==content.upper()
             leading_whitespace_count = len(line) - len(content)
             
@@ -54,11 +54,6 @@ with open('script.txt', 'r') as bigl_script:
 
         # read next content
         line = bigl_script.readline()
-        
-
-
-def clean_sample(sample):
-    return sample.replace('--', '').strip()
 
 # break into sentences and paragraphs
 sentences, paragraphs = [], []
@@ -68,13 +63,13 @@ for character in samples:
     print(f'{character}: {len(samples[character])}')
     
     for sample in samples[character]:
-        sample = clean_sample(sample)
+        
         if not len(sample):
             continue
         
         paragraphs.append({
             'character': character,
-            'text': sample
+            'text': sample.strip()
         })
         sentences += [{'character': character, 'text': sentence}
                       for sentence in re.split('[!?.]', sample) if len(sentence.strip())]
